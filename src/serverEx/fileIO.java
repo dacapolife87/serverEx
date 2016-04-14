@@ -23,31 +23,16 @@ public class fileIO extends TimerTask{
 	HashMap<String,String> map = new HashMap<String, String>();
 	private String filePath;
 	int fileCheckTimer;
+	Properties prop;
 	
 	FileWriter fw = null;
-	public fileIO(){
+	public fileIO(Properties prop){
+		this.prop = prop;
 		Config();
 	}
 	public void Config(){
-		Properties prop = new Properties();
-		InputStream input = null;
-		try {
-			input = new FileInputStream("file.properties");
-			prop.load(input);
-			filePath = prop.getProperty("filepath");
-			fileCheckTimer = Integer.parseInt(prop.getProperty("filechecktimer"));
-
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		} finally {
-			if (input != null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+		filePath = prop.getProperty("filepath");
+		fileCheckTimer = Integer.parseInt(prop.getProperty("filechecktimer"));
 	}
 	public synchronized void updateFileContent(){
 		String content="";
@@ -80,7 +65,7 @@ public class fileIO extends TimerTask{
 			out = new BufferedWriter(new FileWriter(filePath, true));
 			out.write(saveTime+"\t"+msg);
 			out.newLine();
-			out.close();			
+			out.close();		
 		} catch (IOException e1) {
 			log.error("[fileIO.writeFileContent] IOException", e1);
 		}
@@ -89,16 +74,16 @@ public class fileIO extends TimerTask{
 	public synchronized void writeFileMap(JSONObject data){
 		long saveTime = System.currentTimeMillis ()/1000;
 		BufferedWriter out = null;
-		try {
+		try{
 			out = new BufferedWriter(new FileWriter(filePath, true));
 			out.write(saveTime+" "+data.get("KEY")+" "+data.get("VALUE"));
 			out.newLine();
-			out.close();			
-		} catch (IOException e1) {
+			out.close();		
+		}catch (IOException e1) {
 			log.error("[fileIO.writeFileContent] IOException", e1);
 		}
 	}
-	public HashMap<String, String> readFileMap(){
+	public synchronized HashMap<String, String> readFileMap(){
 		String content="";
 		String sentence;	
 		String key;
@@ -116,7 +101,7 @@ public class fileIO extends TimerTask{
 					value = parts[2];
 					map.put(key, value);
 				}
-				in.close();
+				in.close();	
 			}
 		}catch (IOException e) {
 			log.error("[fileIO.readFileContent] IOException", e);
@@ -125,7 +110,7 @@ public class fileIO extends TimerTask{
 		return map;
 	}
 	
-	public String readFileContent(){
+	public synchronized String readFileContent(){
 		String content="";
 		String sentence;
 		try{

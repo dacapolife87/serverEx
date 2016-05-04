@@ -65,6 +65,7 @@ public class server {
 		try {
 			sSocket = new ServerSocket(portNum);
 			tpe = new ThreadPoolExecutor(threadcount,3,10,TimeUnit.MINUTES,new LinkedBlockingQueue<Runnable>());
+			//fio = new fileIO(prop);
 			fio = new fileIO(prop);
 			ScheduledExecutorService fileScheduler = Executors.newSingleThreadScheduledExecutor();
 			fileScheduler.scheduleAtFixedRate(fio, 0,filescheduletime,TimeUnit.MINUTES);

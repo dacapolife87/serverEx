@@ -72,6 +72,7 @@ public class serverThread implements Runnable{
 			while (true) {
 				JSONObject receiveData =null;
 				String type;
+				String temptype;
 				String key;
 
 				readMsg = dis.readUTF();	
@@ -80,7 +81,35 @@ public class serverThread implements Runnable{
 				JSONParser jsonParser = new JSONParser();
 				receiveData = (JSONObject) jsonParser.parse(readMsg);
 				
-				type = (String) receiveData.get("TYPE");
+				temptype = (String) receiveData.get("TYPE");
+				if(temptype.equals("end")){
+					break;
+				}else if (temptype.equals("get")) {
+					log.info("server get method");
+					key = (String) receiveData.get("KEY");
+					String content="";
+					resultData = fio.readFileMap();
+					log.debug("resultData : "+resultData);
+					content = resultData.get(key);
+					log.debug("result.get key : "+content);
+					if(resultData.isEmpty()){
+						content = "정보가없습니다.";
+					}
+					sendMsg("[get]파일 내용 출력");
+					sendMsg(content);
+				}else if (temptype.equals("getA")) {
+					log.info("server get method");
+					String contentA;
+					contentA = fio.readFileContent();
+					sendMsg("[get]파일 내용 출력");
+					sendMsg(contentA);
+				}else if (temptype.equals("put")) {
+					log.info("server put method : ");
+					fio.writeFileMap(receiveData);
+				}else{
+					log.info("잘못된 형식 : "+readMsg);
+				}
+				/*
 				switch (type) {
 				case "end":
 					break;
@@ -112,7 +141,7 @@ public class serverThread implements Runnable{
 				default:
 					log.info("잘못된 형식 : "+readMsg);
 					break;
-				}
+				}*/
 			}
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
